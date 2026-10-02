@@ -27,48 +27,71 @@ nano ~/.bashrc
 ```
 Scroll to the very bottom and add these lines:
 ```bash
-# TRC ROS 2 Aliases
+# TRC ROS 2 Shortcuts
 alias cw='cd ~/ros2_ws'
 alias cs='cd ~/ros2_ws/src'
-alias cb='cd ~/ros2_ws && colcon build'
-alias cbs='cd ~/ros2_ws && colcon build --packages-select'
+alias cb='cd ~/ros2_ws && colcon build --symlink-install'
+alias cbs='cd ~/ros2_ws && colcon build --symlink-install --packages-select'
 alias sb='source ~/.bashrc'
-alias sros='source /opt/ros/humble/setup.bash'
+alias sros='source /opt/ros/jazzy/setup.bash'
 alias sws='source ~/ros2_ws/install/setup.bash'
 ```
 Save (`Ctrl+O`, `Enter`) and Exit (`Ctrl+X`). Then reload it:
 ```bash
 source ~/.bashrc
 ```
-Now, typing `cb` will automatically navigate to your workspace and build it!
+Now, simply typing `cb` in any directory will automatically navigate to your workspace and build it with symlinks!
 
 ---
 
-## 3. Setting up VS Code for ROS 2
-VS Code is the recommended IDE for TRC.
-
-1. Download the `.deb` file from the [VS Code website](https://code.visualstudio.com/) and install it:
-   `sudo dpkg -i code_*.deb`
-2. **Install Extensions:**
-   * C/C++ (by Microsoft)
-   * Python (by Microsoft)
-   * CMake Tools
-   * **ROS** (by Microsoft)
-3. **Launch from Terminal:** Always launch VS Code from a terminal where you have sourced ROS 2! 
-   ```bash
-   cd ~/ros2_ws
-   code .
-   ```
-   If you don't do this, VS Code won't be able to find the `rclpy` or `rclcpp` libraries and will give you red squiggly error lines.
-
----
-
-## 4. Install `htop`
-When your computer freezes because Gazebo is using all your RAM, use `htop` to see what's going on and kill the process.
+## 3. Visualizing Nodes with `rqt_graph`
+Instead of guessing which node is publishing where, visualize your active computational graph:
 ```bash
-sudo apt install htop
+sudo apt install ros-jazzy-rqt-graph -y
+rqt_graph
+```
+This opens an interactive diagram showing all running nodes (ovals) and topics connecting them (rectangles). It is the fastest way to verify your system architecture.
+
+---
+
+## 4. Setting up VS Code for ROS 2
+VS Code is the club's standard development editor.
+
+1. **Install VS Code**:
+   Download the `.deb` package from the [official VS Code website](https://code.visualstudio.com/) and install:
+   ```bash
+   sudo dpkg -i code_*.deb
+   ```
+2. **Recommended Extensions**:
+   * **C/C++** (by Microsoft)
+   * **Python** (by Microsoft)
+   * **ROS** (by Microsoft or Robot Web Tools)
+   * **CMake Tools**
+3. **Avoid Red Squiggles (IntelliSense setup)**:
+   * **Crucial Rule:** Always launch VS Code from a terminal where ROS 2 is sourced (`cd ~/ros2_ws && code .`).
+   * For C++, ensure your `.vscode/c_cpp_properties.json` includes `"/opt/ros/jazzy/include/**"` and `"${workspaceFolder}/install/**/include/**"` in the `includePath`.
+
+---
+
+## 5. Quick Navigation with `colcon_cd`
+Want to instantly jump into any package directory without typing long paths? Set up `colcon_cd`:
+```bash
+echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc
+echo "export _colcon_cd_root=~/ros2_ws" >> ~/.bashrc
+source ~/.bashrc
+```
+Now you can type `colcon_cd <package_name>` from anywhere to jump right to that package folder!
+
+---
+
+## 6. Install `htop`
+When simulations (Gazebo/RViz) consume high memory or CPU, use `htop` to identify and terminate processes:
+```bash
+sudo apt install htop -y
 htop
 ```
 
-## 5. Tab Completion is Your Best Friend
-Never type a full package name or topic name. Start typing `ros2 topic echo /cam` and hit the **`Tab`** key. ROS 2 will automatically complete the topic name for you. If it doesn't, press `Tab` twice to see all available options.
+---
+
+## 7. Tab Completion is Your Best Friend
+Never manually type full node, topic, or package names. Start typing `ros2 topic echo /tur` and press **`Tab`**. ROS 2 will autocomplete the name. Pressing `Tab` twice will show all available matching options.

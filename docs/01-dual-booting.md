@@ -7,18 +7,19 @@ Setting up Ubuntu alongside Windows is the standard and recommended way to work 
 ## 🛠️ Prerequisites
 Before you begin, make sure you have:
 1. **A USB Flash Drive** (at least 8GB, data will be erased).
-2. **Rufus** or **BalenaEtcher** (software to make the USB bootable).
-3. **Ubuntu ISO File**: Download the recommended version (see [Chapter 2](02-ubuntu-versions.md)) from the [official Ubuntu website](https://ubuntu.com/download/desktop).
+2. **Rufus** (software to make the USB bootable).
+3. **Ubuntu ISO File**: Download the Ubuntu 24.04 LTS version from the [Alternative Downloads page](https://ubuntu.com/download/alternative-downloads).
 4. **IMPORTANT**: Back up any critical data on your Windows system just in case!
 
 ---
 
 ## 🛑 Crucial Pre-installation Steps (Windows)
 
-### 1. Save your BitLocker Recovery Key! (For Windows Pro users mostly)
-If your Windows drive is encrypted with BitLocker, changing boot settings might trigger a recovery screen. 
+### 1. Disable BitLocker (For Windows Pro users mostly)
+If your Windows drive is encrypted with BitLocker, it can prevent Ubuntu from installing properly or cause annoying recovery loops. You must disable it before proceeding.
 * Go to Windows search -> Type **Manage BitLocker**.
-* Click **Back up your recovery key** and save it to a separate USB drive or your Microsoft account.
+* Click **Turn off BitLocker** and wait for the decryption process to complete (this can take some time).
+* *(Note: If your laptop is managed by an organization and you cannot turn it off, you must at least back up your recovery key to a USB/Microsoft account and select **Suspend Protection**).*
 
 ### 2. Disable Fast Startup
 Fast Startup can cause issues with mounting Windows partitions in Linux.
@@ -42,28 +43,34 @@ You need to free up space on your hard drive for Ubuntu.
 2. Open **Rufus**.
 3. Select your USB drive under "Device".
 4. Click **SELECT** and choose the Ubuntu ISO file you downloaded.
-5. Click **START**. (If prompted about ISOHybrid, choose "Write in ISO image mode"). Wait for it to finish.
+5. Under **Partition scheme**, make sure **GPT** is selected (and Target system is UEFI).
+6. Click **START**. (If prompted about ISOHybrid, choose "Write in ISO image mode"). Wait for it to finish.
 
 ---
 
 ## ⚙️ BIOS Settings
 You need to tell your computer to boot from the USB instead of Windows.
-1. Restart your PC. As it turns on, repeatedly press your BIOS key (usually `F2`, `F12`, `DEL`, or `ESC` depending on your laptop brand).
-2. Find the **Secure Boot** option (usually under Security or Boot tab) and **Disable** it. (Some Linux drivers don't play well with Secure Boot).
-3. Change the **Boot Order** to put your "USB Flash Drive" at the very top.
-4. Save and Exit (`F10` usually).
+1. Restart your PC. As it turns on, repeatedly press your BIOS key (commonly `F2`, `F12`, `DEL`, or `ESC` depending on your motherboard/laptop brand).
+2. **Disable Secure Boot**: Find the **Secure Boot** option (usually under the *Security* or *Boot* tab) and set it to **Disabled**. (Some third-party hardware drivers like NVIDIA won't load properly if Secure Boot is left on).
+3. **Storage Controller (If drives aren't detected)**: If your laptop has Intel RST / RAID / VMD enabled, Ubuntu will not be able to see your NVMe/SSD drive. Ensure the SATA/Storage operation mode is set to **AHCI / NVMe**. *(Note: Changing this on an existing Windows install might require booting Windows in Safe Mode first).*
+4. **Boot Order**: Change the boot sequence to put your **USB Flash Drive** at the top, or use the one-time boot menu (`F12` on most laptops).
+5. Save changes and exit (`F10` on most systems).
 
 ---
 
-## 🐧 Installing Ubuntu
-1. Your PC should now boot into the Ubuntu setup menu. Select **Try or Install Ubuntu**.
-2. Follow the on-screen instructions (select language, keyboard layout).
-3. **Connect to Wi-Fi** when prompted (helpful for downloading updates during installation).
-4. **Updates and Other Software:** Choose *Normal Installation* and check *Install third-party software for graphics and Wi-Fi hardware*.
-5. **Installation Type (CRITICAL STEP):**
-   * Choose **Install Ubuntu alongside Windows Boot Manager**. This is the easiest and safest option. It will automatically use the unallocated space you created earlier.
-   * *(Advanced users can choose "Something else" to manually configure Root, Swap, and Home partitions, but "Install alongside" is perfectly fine for beginners).*
-6. Create your user account and wait for the installation to finish!
-7. Restart the computer, remove the USB drive when prompted, and press Enter.
+## 🐧 Installing Ubuntu 24.04
+1. Your PC will boot into the GRUB menu. Select **Try or Install Ubuntu**.
+2. Select your language and keyboard layout.
+3. **Connect to the Internet**: Connect to your Wi-Fi or Ethernet (recommended so Ubuntu can download updates and drivers during installation).
+4. **Application Selection**:
+   * Ubuntu 24.04 gives you two options: **Default selection** (minimal) and **Extended selection** (full installation).
+   * **Choose Extended selection** to ensure essential utilities, developer libraries, and tools are available out of the box.
+5. **Proprietary Software**:
+   * Check the boxes for **Install third-party software for graphics and Wi-Fi hardware** and **Download and install support for additional media formats**.
+6. **Installation Type (CRITICAL STEP)**:
+   * Select **Install Ubuntu alongside Windows Boot Manager**. This is the safest automated option; Ubuntu will automatically detect the unallocated space you shrank earlier and create the root filesystem there.
+   * *(If you choose "Manual partitioning", create an EFI partition if not automatically detected, and a root partition `/` formatted as `ext4` on the free space).*
+7. **Identity & User Account**: Enter your name, computer name, username, and a memorable password (you will need this password constantly for `sudo` commands).
+8. Once installation finishes, click **Restart Now**. When prompted with *"Please remove the installation medium, then press ENTER"*, unplug your USB flash drive and hit **Enter**.
 
-🎉 **Congratulations!** You now have a dual-boot system. Every time you turn on your PC, a menu (called GRUB) will appear asking whether you want to boot into Ubuntu or Windows.
+🎉 **Congratulations!** Your dual-boot system is ready. Every time you turn on your PC, the GRUB bootloader will appear, letting you pick between Ubuntu 24.04 and Windows.

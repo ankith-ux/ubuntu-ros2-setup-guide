@@ -15,17 +15,17 @@ ROS 2 is heavily based around these LTS releases. **You should always use an LTS
 
 ## 🎯 Which one should you pick?
 
-For current TRC juniors starting out, we strongly recommend **Ubuntu 22.04 with ROS 2 Humble**.
+For current TRC juniors starting out, we strongly recommend **Ubuntu 24.04 with ROS 2 Jazzy**.
 
 ### 1. The Standard (Highly Recommended)
-* **OS:** Ubuntu 22.04 LTS (Jammy Jellyfish)
-* **ROS 2 Version:** ROS 2 Humble Hawksbill
-* **Why?** This is currently the most widely used and stable version in the robotics community. Most tutorials, third-party packages, and TRC codebases are currently built for Humble.
-
-### 2. The Bleeding Edge
 * **OS:** Ubuntu 24.04 LTS (Noble Numbat)
 * **ROS 2 Version:** ROS 2 Jazzy Jalisco
-* **Why?** This is the newest release. While it will be the standard of the future, as a beginner, you might find fewer tutorials and some community packages might not be fully ported yet.
+* **Why?** This is the newest LTS release and the standard for modern robotics development. It provides the latest features and long-term support.
+
+### 2. The Older Standard (Legacy)
+* **OS:** Ubuntu 22.04 LTS (Jammy Jellyfish)
+* **ROS 2 Version:** ROS 2 Humble Hawksbill
+* **Why?** This was the previous standard. You might still encounter it on some older robots, but for new setups, you should stick to Jazzy.
 
 ### 3. The Outdated
 * **OS:** Ubuntu 20.04 LTS (Focal Fossa)
@@ -35,7 +35,7 @@ For current TRC juniors starting out, we strongly recommend **Ubuntu 22.04 with 
 ---
 
 ## 📝 Summary Checklist before you download the ISO:
-- [ ] I am downloading **Ubuntu 22.04 LTS**.
-- [ ] I will be following tutorials for **ROS 2 Humble**.
+- [ ] I am downloading **Ubuntu 24.04 LTS**.
+- [ ] I will be following tutorials for **ROS 2 Jazzy**.
 
 [Head to the next chapter to install ROS 2!](03-ros2-installation.md)
