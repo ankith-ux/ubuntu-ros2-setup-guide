@@ -1,61 +1,80 @@
 # 4. Essential Post-Install Setup
 
-Just installing ROS 2 isn't enough. We need to set up some essential tools to actually write, build, and manage your own robotic code.
+Installing ROS 2 is just the beginning. This chapter sets up the tools and workspace structure you need to actually write and run your own robot code.
 
 ---
 
-### 1. Automatically Source ROS 2
-Currently, you have to run `source /opt/ros/jazzy/setup.bash` every time you open a new terminal. Let's automate this by adding it to your `.bashrc` file (a script that runs every time a terminal opens).
+## 1. Automatically Source ROS 2
+
+Right now, you would have to type `source /opt/ros/jazzy/setup.bash` every time you open a new terminal for `ros2` commands to work. Let's automate that by adding it to your `.bashrc` (a script that runs automatically each time a terminal opens).
 
 ```bash
 echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### 2. Install Build Tools & Dependencies (Colcon & rosdep)
-`colcon` is the standard build tool used to compile ROS 2 packages, and `rosdep` automates installing package dependencies.
-*(Note: If you installed `ros-dev-tools` in the previous chapter, these are already installed, but running this ensures nothing was missed).*
-
+To confirm it worked, try:
 ```bash
-sudo apt install python3-colcon-common-extensions python3-rosdep -y
+ros2 --version
 ```
+You should see the ROS 2 version printed without any errors.
 
-Initialize `rosdep` (this only needs to be done once per machine):
+---
+
+## 2. Initialize rosdep
+`rosdep` is a tool that automatically installs system-level dependencies for any ROS package you download. It was already installed in the previous step as part of `ros-dev-tools`. We just need to initialize it (once per machine):
+
 ```bash
 sudo rosdep init
 rosdep update
 ```
 
-### 3. Create Your First ROS 2 Workspace
-A workspace is a dedicated folder where you build and develop your robotics code. The community convention is to use `ros2_ws` in your home directory, with a `src` directory inside:
+> **Note:** If `sudo rosdep init` shows `ERROR: default sources list file already exists`, that's fine — it just means it was already initialized. Skip to `rosdep update`.
+
+---
+
+## 3. Create Your First ROS 2 Workspace
+
+A **workspace** is a dedicated folder where you write, build, and organize all your robot code. The standard name used by the community is `ros2_ws`.
 
 ```bash
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws
 colcon build --symlink-install
 ```
-Running `colcon build` generates three new directories:
-* `build/`: Where intermediate build files are stored.
-* `install/`: Where built executables and environment setups are installed.
-* `log/`: Contains logs from compilation.
 
-### 4. Source Your Workspace Safely
-Whenever you build packages in your workspace, your terminal needs to know about them. We can add this to your `.bashrc`, but we should use a conditional check so you don't get *"No such file or directory"* errors before you build:
+> **Note:** You'll see a warning like `No packages were found` — that's expected! The `src/` folder is empty right now. The build still creates the necessary directory structure.
+
+Running `colcon build` generates three directories:
+- `build/` — Intermediate files created during compilation.
+- `install/` — The final output: executables, libraries, and environment setup files.
+- `log/` — Build logs for debugging errors.
+
+---
+
+## 4. Source Your Workspace
+
+Just like you source the base ROS 2 installation, you also need to source your workspace so your terminal knows about the packages you've built. Add a **safe conditional** to your `.bashrc` so it only runs when the workspace exists:
 
 ```bash
 echo 'if [ -f ~/ros2_ws/install/setup.bash ]; then source ~/ros2_ws/install/setup.bash; fi' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### 5. Verify Workspace Overlay
-In ROS 2, packages are tracked via the **`AMENT_PREFIX_PATH`** environment variable (unlike `ROS_PACKAGE_PATH` in ROS 1). Verify that your local workspace is properly overlaying the underlying ROS installation:
+*(The `if` check prevents a "No such file or directory" error when opening a fresh terminal before you've built anything).*
+
+---
+
+## 5. Verify Everything Is Set Up
+
+Check that your environment is correctly layered (workspace on top of base ROS 2):
 
 ```bash
 echo $AMENT_PREFIX_PATH
 ```
-You should see your local workspace path listed first, followed by the base ROS installation:
-```text
-/home/<your_username>/ros2_ws/install/<package_name>:/opt/ros/jazzy
-```
 
-You are now fully configured and ready to write and run ROS 2 packages!
+- **After a fresh empty build**, you'll see only: `/opt/ros/jazzy` — this is normal since no packages have been built yet.
+- **Once you build your first package**, your workspace path will appear first: `/home/<your_username>/ros2_ws/install/<pkg>:/opt/ros/jazzy`
+
+You are now fully set up and ready to create your first ROS 2 package! ✅
+

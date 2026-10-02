@@ -80,9 +80,6 @@ sudo apt install ros-jazzy-desktop
 ```
 *(This downloads several gigabytes — it will take a few minutes).*
 
-> If you are setting up a **headless robot** (Raspberry Pi or similar board with no screen), use the smaller base install instead:
-> `sudo apt install ros-jazzy-ros-base`
-
 ---
 
 ### Step 7: Verify Your Installation
