@@ -27,11 +27,19 @@ Then run `colcon build --symlink-install` again.
 ---
 
 ## 3. Windows time is completely wrong after dual-booting
-**Why it happens:** Windows expects the motherboard hardware clock to be in Local Time, while Ubuntu expects it to be in UTC. When switching between OSes, the clock gets shifted by your timezone offset.
-**Fix:** Tell Ubuntu to use Local Time just like Windows:
-```bash
-timedatectl set-local-rtc 1 --adjust-system-clock
-```
+**Why it happens:** Ubuntu stores the motherboard's hardware clock (RTC) in UTC by default, while Windows stores it in your local timezone. When switching between OSes, Windows reads UTC as local time, shifting your clock by several hours.
+
+**Fix (Recommended: Fix it in Windows):**
+Force Windows to store and read the hardware clock in UTC:
+1. **Open Command Prompt as Administrator:** Press the `Windows` key, type `cmd`, right-click **Command Prompt**, and select **Run as administrator**.
+2. **Run the Registry Command:** Paste the following command and press `Enter`:
+   ```cmd
+   reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\TimeZoneInformation" /v RealTimeIsUniversal /d 1 /t REG_DWORD /f
+   ```
+   You should see: `"The operation completed successfully."`
+3. **Restart and Sync:** Restart your PC back into Windows. Right-click the clock in your taskbar, select **Adjust date/time**, and toggle **Set time automatically** off and back on to force a fresh sync.
+
+*(Note: Once this is done, both Windows and Ubuntu will interpret the hardware clock as UTC, preventing any clock shifts).*
 
 ---
 

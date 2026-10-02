@@ -74,3 +74,18 @@ You need to tell your computer to boot from the USB instead of Windows.
 8. Once installation finishes, click **Restart Now**. When prompted with *"Please remove the installation medium, then press ENTER"*, unplug your USB flash drive and hit **Enter**.
 
 🎉 **Congratulations!** Your dual-boot system is ready. Every time you turn on your PC, the GRUB bootloader will appear, letting you pick between Ubuntu 24.04 and Windows.
+
+---
+
+## ⏰ Post-Installation: Fix Windows Time Desync
+After booting between Ubuntu and Windows, you will likely notice that your Windows clock is off by several hours. This happens because Ubuntu sets the motherboard hardware clock in UTC by default, while Windows expects it in local time. 
+
+**Fix it in Windows by forcing Windows to use UTC:**
+1. Boot into **Windows**.
+2. Press the `Windows` key, type `cmd`, right-click **Command Prompt**, and choose **Run as administrator**.
+3. Run the following registry command:
+   ```cmd
+   reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\TimeZoneInformation" /v RealTimeIsUniversal /d 1 /t REG_DWORD /f
+   ```
+4. Restart your computer back into Windows.
+5. Right-click the clock in your taskbar -> **Adjust date/time** -> toggle **Set time automatically** off and back on to force a fresh sync.
