@@ -86,7 +86,7 @@ You need to tell your computer to boot from the USB, not Windows.
    * *(Advanced option: "Manual partitioning" lets you control every detail, but is not needed for most setups).*
 
 8. **Create Your Login Details:**
-   * Enter your **name**, a **computer name** (e.g., `ankith-laptop`), a **username**, and a **password**.
+   * Enter your **name**, a **computer name**, a **username**, and a **password**.
    * You will type this password every time you use `sudo` in the terminal, so pick something you remember.
 
 9. **Choose Your Location.** Select your timezone on the map (auto-detected if you're online).
