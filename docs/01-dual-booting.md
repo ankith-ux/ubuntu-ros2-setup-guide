@@ -1,91 +1,114 @@
 # 1. Dual-Booting Ubuntu with Windows
 
-Setting up Ubuntu alongside Windows is the standard and recommended way to work with ROS 2. Virtual Machines (VMs) and WSL2 (Windows Subsystem for Linux) can work, but a native dual-boot ensures you get full hardware performance (especially important for graphics and sensors).
+Setting up Ubuntu alongside Windows is the standard and recommended way to work with ROS 2. Virtual Machines (VMs) and WSL2 (Windows Subsystem for Linux) can work, but a native dual-boot gives you full hardware performance, which matters for robotics (cameras, GPU, sensors).
 
 ---
 
-## 🛠️ Prerequisites
+## 🛠️ What You Need
 Before you begin, make sure you have:
-1. **A USB Flash Drive** (at least 8GB, data will be erased).
-2. **Rufus** (software to make the USB bootable).
-3. **Ubuntu ISO File**: Download the Ubuntu 24.04 LTS version from the [Alternative Downloads page](https://ubuntu.com/download/alternative-downloads).
-4. **IMPORTANT**: Back up any critical data on your Windows system just in case!
+1. **A USB Flash Drive** — at least **12GB** (everything on it will be erased).
+2. **Rufus** — free software to flash the USB. Download from [rufus.ie](https://rufus.ie/).
+3. **Ubuntu 24.04 LTS ISO file** — download from the [Alternative Downloads page](https://ubuntu.com/download/alternative-downloads).
+4. **Back up important files** on your Windows system before starting. Just in case!
 
 ---
 
-## 🛑 Crucial Pre-installation Steps (Windows)
+## 🛑 Crucial Pre-installation Steps (Do these in Windows first!)
 
-### 1. Disable BitLocker (For Windows Pro users mostly)
-If your Windows drive is encrypted with BitLocker, it can prevent Ubuntu from installing properly or cause annoying recovery loops. You must disable it before proceeding.
-* Go to Windows search -> Type **Manage BitLocker**.
-* Click **Turn off BitLocker** and wait for the decryption process to complete (this can take some time).
-* *(Note: If your laptop is managed by an organization and you cannot turn it off, you must at least back up your recovery key to a USB/Microsoft account and select **Suspend Protection**).*
+### 1. Disable BitLocker
+If your Windows drive is encrypted with BitLocker, Ubuntu will not be able to see the hard drive properly and will refuse to install alongside Windows. You **must** turn it off first.
+* Go to Windows search → Type **Manage BitLocker** → Open it.
+* Click **Turn off BitLocker** and wait for decryption to finish. This can take a while.
+* *(If your laptop is school/organization-managed and you can't turn it off, at minimum select **Suspend Protection** and ensure your recovery key is saved).*
 
 ### 2. Disable Fast Startup
-Fast Startup can cause issues with mounting Windows partitions in Linux.
-* Open **Control Panel** -> Power Options -> Choose what the power buttons do.
-* Click *Change settings that are currently unavailable*.
-* Uncheck **Turn on fast startup** and Save changes.
+Fast Startup can cause issues reading the Windows drive from Linux.
+* Open **Control Panel** → **Power Options** → **Choose what the power buttons do**.
+* Click **Change settings that are currently unavailable**.
+* Uncheck **Turn on fast startup** → Save changes.
 
-### 3. Create Unallocated Space (Shrinking Windows Partition)
-You need to free up space on your hard drive for Ubuntu.
-* Right-click the Start Button -> **Disk Management**.
-* Right-click your main drive (usually `C:`) and select **Shrink Volume**.
-* Enter the amount of space to shrink in MB. 
-  * **Minimum recommended:** 50,000 MB (50GB).
-  * **Ideal for Robotics/ROS 2:** 100,000 MB (100GB) or more if you plan to install heavy simulation software like Gazebo.
-* Leave this space as "Unallocated". Do not create a new volume!
+### 3. Create Free Space (Shrinking Your Windows Partition)
+Ubuntu needs its own space on the drive. We create this by shrinking the Windows partition.
+* Right-click the **Start Button** → **Disk Management**.
+* Right-click your `C:` drive → **Shrink Volume**.
+* In the "Enter the amount of space to shrink" box, type:
+  * **Minimum:** `50000` (50 GB)
+  * **Recommended for ROS 2 + Gazebo:** `100000` (100 GB)
+* Click **Shrink**. Leave the new free space as **Unallocated** — do not format it or create a new volume.
 
 ---
 
-## 💾 Creating the Bootable USB
+## 💾 Creating the Bootable USB with Rufus
 1. Plug in your USB drive.
 2. Open **Rufus**.
-3. Select your USB drive under "Device".
-4. Click **SELECT** and choose the Ubuntu ISO file you downloaded.
-5. Under **Partition scheme**, make sure **GPT** is selected (and Target system is UEFI).
-6. Click **START**. (If prompted about ISOHybrid, choose "Write in ISO image mode"). Wait for it to finish.
+3. Under **Device**, select your USB drive (double-check — it will be erased!).
+4. Click **SELECT** (next to "Boot selection") and choose the Ubuntu 24.04 ISO file.
+5. Rufus will auto-detect the correct settings. Under **Partition scheme**, ensure **GPT** is selected (this is correct for modern UEFI laptops made after ~2014).
+6. Leave all other settings at their defaults.
+7. Click **START**.
+   * If a dialog appears about **ISOHybrid image**, choose **"Write in ISO Image mode"** and click **OK**.
+   * Confirm the warning that your USB data will be erased.
+8. Wait for the progress bar to turn green and say **READY**. This usually takes about 10 minutes.
 
 ---
 
-## ⚙️ BIOS Settings
-You need to tell your computer to boot from the USB instead of Windows.
-1. Restart your PC. As it turns on, repeatedly press your BIOS key (commonly `F2`, `F12`, `DEL`, or `ESC` depending on your motherboard/laptop brand).
-2. **Disable Secure Boot**: Find the **Secure Boot** option (usually under the *Security* or *Boot* tab) and set it to **Disabled**. (Some third-party hardware drivers like NVIDIA won't load properly if Secure Boot is left on).
-3. **Storage Controller (If drives aren't detected)**: If your laptop has Intel RST / RAID / VMD enabled, Ubuntu will not be able to see your NVMe/SSD drive. Ensure the SATA/Storage operation mode is set to **AHCI / NVMe**. *(Note: Changing this on an existing Windows install might require booting Windows in Safe Mode first).*
-4. **Boot Order**: Change the boot sequence to put your **USB Flash Drive** at the top, or use the one-time boot menu (`F12` on most laptops).
-5. Save changes and exit (`F10` on most systems).
+## ⚙️ BIOS/UEFI Settings
+You need to tell your computer to boot from the USB, not Windows.
+1. Restart your PC. As it boots up, repeatedly press your BIOS key — usually **`F2`**, **`F12`**, **`DEL`**, or **`ESC`** (check your laptop brand; a brief message often shows which key to press).
+2. **Disable Secure Boot**: Find the **Secure Boot** option (usually in the *Security* or *Boot* tab) and set it to **Disabled**. *(Some drivers like NVIDIA won't load with Secure Boot on).*
+3. **Intel RST / RAID (If drives are not detected)**: If your laptop uses Intel RST or RAID, Ubuntu cannot see the drive. Look for a SATA/Storage Mode setting and change it to **AHCI**. *(If Windows was already installed in RAID mode, you may need to boot Windows into Safe Mode first before switching).*
+4. **Boot from USB**: Either change the Boot Order to put your USB at the top, or use the one-time boot menu (usually **`F12`**) to select your USB drive directly.
+5. Save and exit (usually **`F10`**).
 
 ---
 
-## 🐧 Installing Ubuntu 24.04
-1. Your PC will boot into the GRUB menu. Select **Try or Install Ubuntu**.
-2. Select your language and keyboard layout.
-3. **Connect to the Internet**: Connect to your Wi-Fi or Ethernet (recommended so Ubuntu can download updates and drivers during installation).
-4. **Application Selection**:
-   * Ubuntu 24.04 gives you two options: **Default selection** (minimal) and **Extended selection** (full installation).
-   * **Choose Extended selection** to ensure essential utilities, developer libraries, and tools are available out of the box.
-5. **Proprietary Software**:
-   * Check the boxes for **Install third-party software for graphics and Wi-Fi hardware** and **Download and install support for additional media formats**.
-6. **Installation Type (CRITICAL STEP)**:
-   * Select **Install Ubuntu alongside Windows Boot Manager**. This is the safest automated option; Ubuntu will automatically detect the unallocated space you shrank earlier and create the root filesystem there.
-   * *(If you choose "Manual partitioning", create an EFI partition if not automatically detected, and a root partition `/` formatted as `ext4` on the free space).*
-7. **Identity & User Account**: Enter your name, computer name, username, and a memorable password (you will need this password constantly for `sudo` commands).
-8. Once installation finishes, click **Restart Now**. When prompted with *"Please remove the installation medium, then press ENTER"*, unplug your USB flash drive and hit **Enter**.
+## 🐧 Installing Ubuntu 24.04 (Step-by-Step)
 
-🎉 **Congratulations!** Your dual-boot system is ready. Every time you turn on your PC, the GRUB bootloader will appear, letting you pick between Ubuntu 24.04 and Windows.
+1. **Boot the installer.** Your PC should boot from the USB. Select your **language** and any **accessibility settings** needed.
+
+2. **Connect to the internet.** Connect to Wi-Fi or Ethernet when prompted. This lets Ubuntu download updates and hardware drivers (like NVIDIA GPU drivers) during install.
+
+3. **Choose "Try or Install Ubuntu".** On the next screen, click **Install Ubuntu** to proceed with installation. *(Clicking "Try Ubuntu" lets you preview the desktop without installing anything).*
+
+4. **Choose Interactive Installation.** When asked between *Interactive installation* and *Automated installation*, select **Interactive installation** (the standard option).
+
+5. **Choose Application Selection:**
+   * **Default selection** — Minimal apps (you can add more later via the App Center).
+   * **Extended selection** — Full suite of utilities and office tools, better for offline use.
+   * For robotics development, **Extended selection** is recommended.
+
+6. **Install Proprietary Software.** Check both boxes:
+   * ✅ *Install third-party software for graphics and Wi-Fi hardware* (important for NVIDIA GPUs!)
+   * ✅ *Download and install support for additional media formats*
+
+7. **Installation Type (CRITICAL STEP):**
+   * Select **"Install Ubuntu alongside Windows Boot Manager"**. This is the safest option — Ubuntu will automatically use the unallocated space you created earlier.
+   * *(Advanced option: "Manual partitioning" lets you control every detail, but is not needed for most setups).*
+
+8. **Create Your Login Details:**
+   * Enter your **name**, a **computer name** (e.g., `ankith-laptop`), a **username**, and a **password**.
+   * You will type this password every time you use `sudo` in the terminal, so pick something you remember.
+
+9. **Choose Your Location.** Select your timezone on the map (auto-detected if you're online).
+
+10. **Review and Install.** You'll see a summary. Click **Install** to begin. This takes 15–30 minutes.
+
+11. **Restart.** When done, click **Restart Now**. When prompted, remove the USB drive and press **Enter**.
+
+🎉 **Congratulations!** Your dual-boot is ready. On every startup, the **GRUB** bootloader will appear, letting you choose between Ubuntu 24.04 and Windows.
 
 ---
 
 ## ⏰ Post-Installation: Fix Windows Time Desync
-After booting between Ubuntu and Windows, you will likely notice that your Windows clock is off by several hours. This happens because Ubuntu sets the motherboard hardware clock in UTC by default, while Windows expects it in local time. 
+After switching between Ubuntu and Windows, your Windows clock will likely show the wrong time (off by several hours). This is because Ubuntu stores the hardware clock in UTC, while Windows expects it in local time.
 
-**Fix it in Windows by forcing Windows to use UTC:**
+**Fix it in Windows (one-time setup):**
 1. Boot into **Windows**.
-2. Press the `Windows` key, type `cmd`, right-click **Command Prompt**, and choose **Run as administrator**.
-3. Run the following registry command:
+2. Press `Windows` key → type `cmd` → right-click **Command Prompt** → **Run as administrator**.
+3. Paste this command and press **Enter**:
    ```cmd
    reg add "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\TimeZoneInformation" /v RealTimeIsUniversal /d 1 /t REG_DWORD /f
    ```
-4. Restart your computer back into Windows.
-5. Right-click the clock in your taskbar -> **Adjust date/time** -> toggle **Set time automatically** off and back on to force a fresh sync.
+4. Restart Windows.
+5. Right-click the clock in the taskbar → **Adjust date/time** → toggle **Set time automatically** off and back on to force a sync.
+
