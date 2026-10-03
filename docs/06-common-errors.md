@@ -2,6 +2,8 @@
 
 When starting out with Linux and ROS 2, you *will* encounter errors. Don't panic! Here are the most common ones and how to fix them.
 
+> 💡 **Golden rule of debugging:** Read the **first** error in the output, not the last. Scroll up! When asking someone for help, send the **exact command you ran** plus the **full error text** (copy-paste, not a phone photo of the screen).
+
 ---
 
 ## 1. `ros2: command not found`
@@ -81,7 +83,7 @@ Force Windows to store and read the hardware clock in UTC:
 
 ---
 
-## 7. Interference on Lab Wi-Fi (Cross-talk with other club members)
+## 7. Interference on Shared Wi-Fi (Cross-talk with other users)
 **Why it happens:** ROS 2 uses DDS multicast to automatically discover other nodes on the same local network. If multiple students in the lab are running ROS 2 on the same Wi-Fi, their nodes and topics will merge!
 **Fix:** Assign yourself a unique **`ROS_DOMAIN_ID`** (a number between 0 and 101):
 ```bash
@@ -89,3 +91,61 @@ echo "export ROS_DOMAIN_ID=42" >> ~/.bashrc
 source ~/.bashrc
 ```
 *(Pick an ID agreed upon with your team so you only talk to your own robot and team members).*
+
+> 💡 If you only want to experiment on your own laptop and not talk to *any* other machine, add this instead:
+> ```bash
+> echo "export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST" >> ~/.bashrc
+> ```
+> *(This replaces the old `ROS_LOCALHOST_ONLY=1` variable you may see in Humble-era tutorials.)*
+
+---
+
+## 8. `Package '<my_package>' not found` (right after building it)
+**Why it happens:** The terminal you're using was opened *before* the package was built, so it doesn't know about it yet.
+**Fix:** From the workspace root, re-source the workspace (or simply open a new terminal):
+```bash
+cd ~/ros2_ws
+source install/setup.bash
+```
+Also check that `colcon build` actually finished without errors, and that you ran it from `~/ros2_ws` (not from inside `src/`).
+
+---
+
+## 9. `colcon: command not found`
+**Why it happens:** The ROS 2 development tools were not installed.
+**Fix:**
+```bash
+sudo apt install ros-dev-tools
+```
+
+---
+
+## 10. `sudo apt update` fails with `EXPKEYSIG F42ED6FBAB17C654` or `Conflicting values set for option Signed-By`
+**Why it happens:** You (or an old tutorial) set up the ROS repository using the **old manual key method** (`ros-archive-keyring.gpg` + `ros2.list`). That old key expired in 2025, and having both the old and the new (`ros2-apt-source`) setup at the same time also causes conflicts.
+**Fix:** Remove the old setup, then add the repository the modern way:
+```bash
+sudo rm -f /etc/apt/sources.list.d/ros2.list /usr/share/keyrings/ros-archive-keyring.gpg
+```
+Then redo **[Chapter 3 → Step 3](03-ros2-installation.md#step-3-add-the-ros-2-repository)** and run `sudo apt update` again.
+
+---
+
+## 11. Nodes on two different laptops (or laptop ↔ robot) can't see each other
+**Why it happens:** ROS 2 discovery needs both machines on the **same network** with the **same `ROS_DOMAIN_ID`**. Many college/public Wi-Fi networks also block the multicast traffic ROS 2 uses for discovery.
+**Fix:**
+1. On both machines, check that `echo $ROS_DOMAIN_ID` prints the same value, and that `ROS_AUTOMATIC_DISCOVERY_RANGE` is **not** set to `LOCALHOST`.
+2. Test multicast: run `ros2 multicast receive` on one machine and `ros2 multicast send` on the other. If nothing arrives, the network is blocking it.
+3. Workaround: connect both devices to a **phone hotspot** or a dedicated router instead of campus Wi-Fi.
+
+---
+
+## 12. RViz2 or Gazebo crashes, shows a black window, or is extremely slow
+**Why it happens:** Usually a graphics driver problem (very common inside VMs, or on NVIDIA laptops without the proper driver).
+**Fix:**
+* **Native Ubuntu with an NVIDIA GPU:** Open **Software & Updates** → **Additional Drivers**, select the recommended **NVIDIA driver (proprietary, tested)**, apply, and reboot. Verify with `nvidia-smi`.
+* **Inside a VM (or as a quick test):** Force software rendering before launching:
+  ```bash
+  export LIBGL_ALWAYS_SOFTWARE=1
+  rviz2
+  ```
+  *(This is slower, but should at least open.)*

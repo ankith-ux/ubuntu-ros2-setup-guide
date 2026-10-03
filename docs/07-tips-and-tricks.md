@@ -15,6 +15,13 @@ sudo apt install terminator
 * `Ctrl` + `Shift` + `E` = Split vertically
 * `Ctrl` + `Shift` + `O` = Split horizontally
 * `Alt` + `Arrow Keys` = Move between splits
+* `Ctrl` + `Shift` + `W` = Close the current split
+
+**Tmux** does the same thing *inside* any terminal, and keeps running even if you disconnect — very useful when you SSH into a robot's onboard computer (e.g. a Raspberry Pi):
+```bash
+sudo apt install tmux
+```
+*Shortcuts (press `Ctrl` + `B`, release, then the key):* `%` = split vertically, `"` = split horizontally, `Arrow Keys` = move between splits, `d` = detach (reattach later with `tmux attach`).
 
 ---
 
@@ -27,7 +34,7 @@ nano ~/.bashrc
 ```
 Scroll to the very bottom and add these lines:
 ```bash
-# TRC ROS 2 Shortcuts
+# ROS 2 Shortcuts
 alias cw='cd ~/ros2_ws'
 alias cs='cd ~/ros2_ws/src'
 alias cb='cd ~/ros2_ws && colcon build --symlink-install'
@@ -45,31 +52,34 @@ Now, simply typing `cb` in any directory will automatically navigate to your wor
 ---
 
 ## 3. Visualizing Nodes with `rqt_graph`
-Instead of guessing which node is publishing where, visualize your active computational graph:
+Instead of guessing which node is publishing where, visualize your active computational graph (it's already included with `ros-jazzy-desktop`):
 ```bash
-sudo apt install ros-jazzy-rqt-graph -y
 rqt_graph
 ```
-This opens an interactive diagram showing all running nodes (ovals) and topics connecting them (rectangles). It is the fastest way to verify your system architecture.
+This opens an interactive diagram showing all running nodes (ovals) and topics connecting them (rectangles). It is the fastest way to verify your system architecture. *(Click the 🔄 refresh button at the top-left if you start new nodes after opening it.)*
 
 ---
 
 ## 4. Setting up VS Code for ROS 2
-VS Code is the club's standard development editor.
+VS Code is a popular, beginner-friendly development editor for ROS 2.
 
 1. **Install VS Code**:
-   Download the `.deb` package from the [official VS Code website](https://code.visualstudio.com/) and install:
+   Download the `.deb` package from the [official VS Code website](https://code.visualstudio.com/) and install it from your `Downloads` folder (using `apt` instead of `dpkg` automatically installs any missing dependencies):
    ```bash
-   sudo dpkg -i code_*.deb
+   cd ~/Downloads
+   sudo apt install ./code_*.deb
    ```
-2. **Recommended Extensions**:
+   *(If it asks whether to add the Microsoft apt repository, say **Yes** — that keeps VS Code updated with `sudo apt upgrade`.)*
+2. **Recommended Extensions** (search for them in the Extensions tab, `Ctrl` + `Shift` + `X`):
    * **C/C++** (by Microsoft)
    * **Python** (by Microsoft)
-   * **ROS** (by Microsoft or Robot Web Tools)
-   * **CMake Tools**
+   * **Robot Developer Extensions for ROS 2** (by Ranch Hand Robotics) — the maintained successor of Microsoft's old **ROS** extension (`ms-iot.vscode-ros`), which is deprecated. Uninstall the old one if you have it.
+   * **CMake Tools** (by Microsoft)
+   * **XML** (by Red Hat) — helpful for `package.xml`, URDF and launch files
 3. **Avoid Red Squiggles (IntelliSense setup)**:
    * **Crucial Rule:** Always launch VS Code from a terminal where ROS 2 is sourced (`cd ~/ros2_ws && code .`).
    * For C++, ensure your `.vscode/c_cpp_properties.json` includes `"/opt/ros/jazzy/include/**"` and `"${workspaceFolder}/install/**/include/**"` in the `includePath`.
+   * For Python, if imports like `rclpy` are underlined, add `"/opt/ros/jazzy/lib/python3.12/site-packages"` to `python.analysis.extraPaths` in your VS Code settings.
 
 ---
 
@@ -95,3 +105,15 @@ htop
 
 ## 7. Tab Completion is Your Best Friend
 Never manually type full node, topic, or package names. Start typing `ros2 topic echo /tur` and press **`Tab`**. ROS 2 will autocomplete the name. Pressing `Tab` twice will show all available matching options.
+
+---
+
+## 8. Keep Your System Updated
+ROS 2 Jazzy gets regular bug-fix releases through `apt`. Once every week or two, run:
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+---
+
+🎓 **That's the end of the guide!** You now have a working Ubuntu 24.04 + ROS 2 Jazzy setup. Head back to the [main README](../README.md), or continue with the official [ROS 2 Jazzy tutorials](https://docs.ros.org/en/jazzy/Tutorials.html).
